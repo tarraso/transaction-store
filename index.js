@@ -18,11 +18,8 @@ app.use(mongo({
     db: 'transactions'
 }));
 
-app.use(users.routes())
-    .use(users.allowedMethods());
+app.use(users.middleware());
 
-
-app.use(transactions.routes())
-    .use(users.allowedMethods());
+app.use(transactions.middleware());
 
 app.listen(3000);

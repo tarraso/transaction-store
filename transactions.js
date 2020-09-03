@@ -1,11 +1,13 @@
-const Router = require('koa-router');
-const router = Router({
-  prefix: '/transactions'
-});
+const Router = require('koa-joi-router');
+const Joi = Router.Joi;
 
 const {Converter} =  require('./converter');
 
 const converter = new Converter();
+
+router = Router();
+router.prefix('/transactions');
+
 
 router
   .get('/', async(ctx, next) => {
@@ -48,8 +50,9 @@ router
       data: transactions
     }
     next();
-  })
-  .get('/total', async(ctx, next) => {
+  });
+
+router.get('/total', async(ctx, next) => {
     let totalIncomeTransactionsAmount = (await ctx.db.collection('transactions')
     .find({'user_id':ctx.state.user.id, 'type': 'income'})
     .toArray()).map((e)=> e.amount).reduce((a,b)=> a+b,0);
@@ -62,8 +65,28 @@ router
       totalAmount
     }
     next();
-  })
-  .post('/', async(ctx, next) => {
+  });
+
+ router.route({
+  method: 'post',
+  path: '/',
+  validate: {
+    body: {
+      amount: Joi.number().greater(0),
+      type: Joi.string().valid('income', 'expense')
+    },
+    type: 'form',
+    output: {
+      200: {
+        body: {
+          amount: Joi.number().greater(0),
+          type: Joi.string().valid('income', 'expense'),
+          user_id: Joi.string(),
+        }
+      }
+    }
+  },
+  handler: async(ctx, next) => {
     const user = ctx.state.user.data;
     const transaction = {
       user_id: user._id,
@@ -71,15 +94,10 @@ router
       type: ctx.request.body.type,
       date: new Date(Date.now()).toISOString()
     };
-    if (transaction.type != 'income' && transaction.type != 'expense') {
-      ctx.status = 401;
-      ctx.body = {
-        'error': 'Wrong transaction type'
-      };
-    };
     ctx.body = (await ctx.db.collection('transactions').insertOne(transaction)).ops[0];
     next();
-  });
+  }
+});
 
 module.exports = router;
 
