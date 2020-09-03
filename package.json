@@ -18,12 +18,14 @@
   "homepage": "https://github.com/tarraso/transaction-store#readme",
   "dependencies": {
     "bcrypt": "^5.0.0",
+    "dateformat": "^3.0.3",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.13.0",
     "koa-bodyparser": "^4.3.0",
     "koa-jsonp": "^2.0.2",
     "koa-jwt": "^4.0.0",
     "koa-mongo": "^1.9.1",
-    "koa-router": "^9.4.0"
+    "koa-router": "^9.4.0",
+    "xml2js": "^0.4.23"
   }
 }
