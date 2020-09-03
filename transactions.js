@@ -3,6 +3,9 @@ const router = Router({
   prefix: '/transactions'
 });
 
+const {Converter} =  require('./converter');
+
+const converter = new Converter();
 
 router
   .get('/', async(ctx, next) => {
@@ -30,6 +33,12 @@ router
                                     .skip(offset)
                                     .limit(limit)
                                     .toArray();
+    
+    const currency = ctx.state.user.data.currency;
+    for (let i = 0; i < transactions.length; i++) {
+      const trasaction = transactions[i];
+      trasaction.amount = converter.convert(trasaction.amount, currency)
+    }
     ctx.body = transactions;
     next();
   })
@@ -41,8 +50,9 @@ router
     .find({'user_id':ctx.state.user.id, 'type': 'expense'})
     .toArray()).map((e)=> e.amount).reduce((a,b)=> a+b,0);
     let totalAmount = totalIncomeTransactionsAmount-totalExpenseTransactionsAmount;
+    totalAmount = converter.convert(totalAmount, ctx.state.user.data.currency);
     ctx.body = {
-      amount: totalAmount
+      totalAmount
     }
     next();
   })
