@@ -7,30 +7,37 @@ const router = Router({
   prefix: '/users'
 });
 
-
+const ALLOWED_CURRENCIES = ['AUD', 'GBP', 'BYR', 'DKK', 'USD', 'EUR', 'ISK', 'KZT', 'RUB']
 router
   .post('/', async(ctx, next) => {
     
-    // TODO add extra validation
     const nickname = ctx.request.body.nickname;
     const users = await ctx.db.collection('users').find({nickname:nickname}).toArray();
- 
+
     if (!ctx.request.body) {
       ctx.response
     }
     if (users.length > 0 ) {
+      ctx.status = 401;
       ctx.response.body = {
         error: 'User ' + nickname + ' already exists.'
       }
-      
       return;
+    }
+    const currency = ctx.request.body.currency;
+    if (ALLOWED_CURRENCIES.indexOf(currency) == -1 ){
+      ctx.status = 401;
+      ctx.response.body = {
+        error: 'Invalid currency'
+      }
     }
 
     const password = await bcrypt.hash(ctx.request.body.password, 5);
-    const user = (await ctx.db.collection('users').insertOne({nickname, password})).ops[0];
+    const user = (await ctx.db.collection('users').insertOne({nickname, password, currency})).ops[0];
     ctx.response.body = {
       id: user._id,
-      nickname: user.nickname
+      nickname: user.nickname,
+      currency
     };
     next();
   })
