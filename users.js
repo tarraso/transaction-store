@@ -28,7 +28,7 @@ router
     if (ALLOWED_CURRENCIES.indexOf(currency) == -1 ){
       ctx.status = 401;
       ctx.response.body = {
-        error: 'Invalid currency'
+        error: 'incorrect currency code'
       }
     }
 
