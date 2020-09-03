@@ -27,9 +27,11 @@ router
     } else {
       limit = 10;
     }
-    let transactions = await ctx.db.collection('transactions')
+    let transactions_query = ctx.db.collection('transactions')
                                     .find({'user_id':ctx.state.user.data._id})
-                                    .sort({'date': order})
+                                    .sort({'date': order});
+    let total = await transactions_query.count();                           
+    let transactions = await transactions_query
                                     .skip(offset)
                                     .limit(limit)
                                     .toArray();
@@ -39,7 +41,12 @@ router
       const trasaction = transactions[i];
       trasaction.amount = converter.convert(trasaction.amount, currency)
     }
-    ctx.body = transactions;
+    ctx.body = {
+      limit,
+      offset,
+      total,
+      data: transactions
+    }
     next();
   })
   .get('/total', async(ctx, next) => {
