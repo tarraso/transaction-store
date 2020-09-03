@@ -12,6 +12,13 @@ const ALLOWED_CURRENCIES = ['AUD', 'GBP', 'BYR', 'DKK', 'USD', 'EUR', 'ISK', 'KZ
 router.route({
   method: 'post',
   path: '/',
+  meta: {
+    swagger: {
+      summary: 'User sign up',
+      description: 'Creates user with specified nickname, password and currency',
+      tags: ['users']
+    }
+  },
   validate: {
     body: {
       nickname: Joi.string().max(100),
@@ -62,6 +69,13 @@ router.route({
 });
 
 router.route({
+  meta: {
+    swagger: {
+      summary: 'User login',
+      description: 'Provides Bearer token for specified username and password',
+      tags: ['users']
+    }
+  },
   method: 'post',
   path: '/login',
   validate: {
